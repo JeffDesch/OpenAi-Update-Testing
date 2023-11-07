@@ -14,7 +14,7 @@ Higher level characters should have very epic gear and titles compared to lower 
 Characters approaching level 20 should have many unique and powerful items. 
 Follow this specification:
 {
-    fullname: {type: String, description: The character's full name, two to five words in length.},
+    full_name: {type: String, description: Full name, two to five words in length.},
     nickname: {type: String, description: Nickname used by friends and family.},
     title: Optional[String],
     class: Literal[Wizard, Fighter, Cleric],
