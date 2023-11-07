@@ -1,33 +1,35 @@
 import json
 import os
+from typing import Literal
 
 from openai import OpenAI
 from dotenv import load_dotenv
+from pydantic import BaseModel, conint, constr, conlist
 
 load_dotenv()
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
+
+class Character(BaseModel):
+    full_name: str
+    profession: Literal["Wizard", "Fighter", "Cleric", "Rogue"]
+    race: Literal["Human", "Goblin", "Fairy"]
+    level: conint(ge=1, le=20)
+    damage_types: conlist(item_type=Literal["Arcane", "Physical", "Holy", "Shadow"], min_length=1, max_length=3)
+
+
 user_prompt = """Create a list of 3 characters for a high-fantasy RPG game. 
-Higher level characters should have very epic gear and titles compared to lower level characters' junk gear. 
-Characters approaching level 20 should have many unique and powerful items. 
-Follow this specification:
-{
-    full_name: {type: String, description: Full name, two to five words in length.},
-    nickname: {type: String, description: Nickname used by friends and family.},
-    title: Optional[String],
-    class: Literal[Wizard, Fighter, Cleric],
-    race: Literal[Human, Dwarf, Elf],
-    gender: Literal[Female, Male, Non-binary],
-    age: Float,
-    level: Integer[1, 20],
-    description: {type: String, description: Three to five sentences describing the visual appearance of the character.},
-    damage_types: List[Literal[Fire, Frost, Arcane, Slashing, Piecing, Bludgeoning, Holy, Void]],
-    weapons: {type: List[String], count: Range(0, 2)},
-    armor: {type: List[String], count: Range(0, 2)},
-    jewelry: {type: List[String], count: Range(0, 2)} 
-}"""
+Follow this Pydantic specification for output:
+
+class Character(BaseModel):
+    full_name: str
+    profession: Literal["Wizard", "Fighter", "Cleric", "Rogue"]
+    race: Literal["Human", "Goblin", "Fairy"]
+    level: conint(ge=1, le=20)
+    damage_types: conlist(item_type=Literal["Arcane", "Physical", "Holy", "Shadow"], min_length=1, max_length=3)
+"""
 
 chat_completion, *_ = client.chat.completions.create(
     messages=[
