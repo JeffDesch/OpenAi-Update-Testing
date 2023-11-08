@@ -4,12 +4,10 @@ from typing import Literal
 
 from openai import OpenAI
 from dotenv import load_dotenv
-from pydantic import BaseModel, conint, constr, conlist
+from pydantic import BaseModel, conint, conlist
 
 load_dotenv()
-client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 class Character(BaseModel):
@@ -20,7 +18,13 @@ class Character(BaseModel):
     damage_types: conlist(item_type=Literal["Arcane", "Physical", "Holy", "Shadow"], min_length=1, max_length=3)
 
 
-user_prompt = """Create a list of 3 characters for a high-fantasy RPG game. 
+class Party(BaseModel):
+    characters: conlist(item_type=Character)
+
+
+n_characters = 5
+user_prompt = f"""Create a balanced party of {n_characters} characters for a fantasy RPG game. 
+The characters should be level 10-15.
 Follow this Pydantic specification for output:
 
 class Character(BaseModel):
@@ -29,6 +33,9 @@ class Character(BaseModel):
     race: Literal["Human", "Goblin", "Fairy"]
     level: conint(ge=1, le=20)
     damage_types: conlist(item_type=Literal["Arcane", "Physical", "Holy", "Shadow"], min_length=1, max_length=3)
+
+class Party(BaseModel):
+    characters: conlist(item_type=Character)
 """
 
 chat_completion, *_ = client.chat.completions.create(
